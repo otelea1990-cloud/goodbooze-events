@@ -458,6 +458,29 @@
     background: rgba(180,25,25,1);
   }
 
+
+  .radio-group {
+    display: flex;
+    gap: 24px;
+  }
+
+  .radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: rgba(240,236,228,0.7);
+    font-weight: 300;
+    cursor: pointer;
+  }
+
+  .radio-label input[type="radio"] {
+    accent-color: rgba(180,25,25,0.9);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
 </style>
 </head>
 <body>
@@ -563,6 +586,17 @@
         <label class="form-label" for="telefon">Număr de telefon</label>
         <input class="form-input" type="tel" id="telefon" placeholder="07xx xxx xxx" autocomplete="tel">
       </div>
+      <div class="form-group">
+        <label class="form-label">Vii însoțit?</label>
+        <div class="radio-group">
+          <label class="radio-label"><input type="radio" name="insotit" value="nu" checked onchange="toggleInsotit(this)"> Nu</label>
+          <label class="radio-label"><input type="radio" name="insotit" value="da" onchange="toggleInsotit(this)"> Da</label>
+        </div>
+      </div>
+      <div class="form-group" id="numeInsotitGroup" style="display:none;">
+        <label class="form-label" for="numeInsotit">Numele persoanei care te însoțește</label>
+        <input class="form-input" type="text" id="numeInsotit" placeholder="Nume și prenume">
+      </div>
       <button class="form-submit" id="submitBtn" onclick="submitForm()">
         ✓ &nbsp; Confirmă participarea
       </button>
@@ -593,13 +627,24 @@
 <script>
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyToWhT1e3shZwQnWAgHlWN9UcuZ1o0zbXyBHH8t7aKFPDb8zQddrK8IG-p0AGDeSFpuQ/exec';
 
+  function toggleInsotit(el) {
+    document.getElementById('numeInsotitGroup').style.display = el.value === 'da' ? 'block' : 'none';
+  }
+
   function submitForm() {
     const nume = document.getElementById('nume').value.trim();
     const telefon = document.getElementById('telefon').value.trim();
+    const insotit = document.querySelector('input[name="insotit"]:checked').value;
+    const numeInsotit = insotit === 'da' ? document.getElementById('numeInsotit').value.trim() : '';
     const btn = document.getElementById('submitBtn');
 
     if (!nume || !telefon) {
       alert('Te rugăm să completezi numele și numărul de telefon.');
+      return;
+    }
+
+    if (insotit === 'da' && !numeInsotit) {
+      alert('Te rugăm să completezi numele persoanei care te însoțește.');
       return;
     }
 
@@ -610,7 +655,7 @@
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nume, telefon })
+      body: JSON.stringify({ nume, telefon, insotit, numeInsotit })
     })
     .then(() => {
       document.getElementById('formContainer').style.display = 'none';
