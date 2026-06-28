@@ -481,6 +481,13 @@
     cursor: pointer;
   }
 
+
+  .required-star {
+    color: rgba(180,25,25,0.9);
+    font-size: 10px;
+    vertical-align: middle;
+  }
+
 </style>
 </head>
 <body>
@@ -579,12 +586,12 @@
   <div class="form-wrap">
     <div id="formContainer">
       <div class="form-group">
-        <label class="form-label" for="nume">Nume și prenume</label>
-        <input class="form-input" type="text" id="nume" placeholder="Alexandru Ionescu" autocomplete="name">
+        <label class="form-label" for="nume">Nume și prenume <span class="required-star">*</span></label>
+        <input class="form-input" type="text" id="nume" placeholder="Alexandru Ionescu" autocomplete="name" required>
       </div>
       <div class="form-group">
-        <label class="form-label" for="telefon">Număr de telefon</label>
-        <input class="form-input" type="tel" id="telefon" placeholder="07xx xxx xxx" autocomplete="tel">
+        <label class="form-label" for="telefon">Număr de telefon <span class="required-star">*</span></label>
+        <input class="form-input" type="tel" id="telefon" placeholder="07xx xxx xxx" autocomplete="tel" required>
       </div>
       <div class="form-group">
         <label class="form-label">Vii însoțit?</label>
@@ -598,8 +605,8 @@
         <input class="form-input" type="text" id="numeInsotit" placeholder="Nume și prenume">
       </div>
       <div class="form-group">
-        <label class="form-label" for="cod">Codul tău de invitație</label>
-        <input class="form-input" type="text" id="cod" placeholder="Ex: GB-P17765" autocomplete="off" style="text-transform:uppercase;letter-spacing:2px;">
+        <label class="form-label" for="cod">Codul tău de invitație <span class="required-star">*</span></label>
+        <input class="form-input" type="text" id="cod" placeholder="Ex: GB-P17765" autocomplete="off" style="text-transform:uppercase;letter-spacing:2px;" required pattern="GB-[A-Z0-9]{6}" title="Codul trebuie să aibă formatul GB-XXXXXX">
       </div>
       <button class="form-submit" id="submitBtn" onclick="submitForm()">
         ✓ &nbsp; Confirmă participarea
@@ -629,7 +636,7 @@
 </footer>
 
 <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyToWhT1e3shZwQnWAgHlWN9UcuZ1o0zbXyBHH8t7aKFPDb8zQddrK8IG-p0AGDeSFpuQ/exec';
+  const SCRIPT_URL = 'https://goodbooze-api.vercel.app/api/confirma';
 
   function toggleInsotit(el) {
     document.getElementById('numeInsotitGroup').style.display = el.value === 'da' ? 'block' : 'none';
@@ -663,18 +670,32 @@
 
     fetch(SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nume, telefon, insotit, numeInsotit, cod })
     })
-    .then(() => {
-      document.getElementById('formContainer').style.display = 'none';
-      document.getElementById('successMsg').style.display = 'block';
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+      if (data.status === 'success') {
+        document.getElementById('formContainer').style.display = 'none';
+        document.getElementById('successMsg').style.display = 'block';
+      } else if (data.status === 'used') {
+        btn.disabled = false;
+        btn.textContent = '✓  Confirmă participarea';
+        alert('Acest cod a fost deja folosit.');
+      } else if (data.status === 'invalid') {
+        btn.disabled = false;
+        btn.textContent = '✓  Confirmă participarea';
+        alert('Cod de invitație invalid. Verifică codul primit și încearcă din nou.');
+      } else {
+        btn.disabled = false;
+        btn.textContent = '✓  Confirmă participarea';
+        alert('A apărut o eroare. Te rugăm să încerci din nou.');
+      }
     })
-    .catch(() => {
+    .catch(function() {
       btn.disabled = false;
       btn.textContent = '✓  Confirmă participarea';
-      alert('A apărut o eroare. Te rugăm să încerci din nou.');
+      alert('A apărut o eroare de conexiune. Te rugăm să încerci din nou.');
     });
   }
 </script>
