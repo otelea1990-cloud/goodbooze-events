@@ -597,6 +597,10 @@
         <label class="form-label" for="numeInsotit">Numele persoanei care te însoțește</label>
         <input class="form-input" type="text" id="numeInsotit" placeholder="Nume și prenume">
       </div>
+      <div class="form-group">
+        <label class="form-label" for="cod">Codul tău de invitație</label>
+        <input class="form-input" type="text" id="cod" placeholder="Ex: GB-P17765" autocomplete="off" style="text-transform:uppercase;letter-spacing:2px;">
+      </div>
       <button class="form-submit" id="submitBtn" onclick="submitForm()">
         ✓ &nbsp; Confirmă participarea
       </button>
@@ -636,6 +640,7 @@
     const telefon = document.getElementById('telefon').value.trim();
     const insotit = document.querySelector('input[name="insotit"]:checked').value;
     const numeInsotit = insotit === 'da' ? document.getElementById('numeInsotit').value.trim() : '';
+    const cod = document.getElementById('cod').value.trim().toUpperCase();
     const btn = document.getElementById('submitBtn');
 
     if (!nume || !telefon) {
@@ -648,14 +653,19 @@
       return;
     }
 
+    if (!cod) {
+      alert('Te rugăm să introduci codul de invitație.');
+      return;
+    }
+
     btn.disabled = true;
-    btn.textContent = 'Se trimite...';
+    btn.textContent = 'Se verifică...';
 
     fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nume, telefon, insotit, numeInsotit })
+      body: JSON.stringify({ nume, telefon, insotit, numeInsotit, cod })
     })
     .then(() => {
       document.getElementById('formContainer').style.display = 'none';
@@ -663,7 +673,7 @@
     })
     .catch(() => {
       btn.disabled = false;
-      btn.textContent = '✓   Confirmă participarea';
+      btn.textContent = '✓  Confirmă participarea';
       alert('A apărut o eroare. Te rugăm să încerci din nou.');
     });
   }
